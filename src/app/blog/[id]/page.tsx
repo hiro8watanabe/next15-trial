@@ -1,9 +1,7 @@
-
-
 interface Params {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export const generateMetadata = async ({ params }: Params) => {
