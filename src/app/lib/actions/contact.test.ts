@@ -1,5 +1,4 @@
 import { submitContactForm } from './contact';
-import { ContactSchema } from '@/validations/contact';
 
 // redirectのモック
 jest.mock('next/navigation', () => ({
@@ -69,17 +68,6 @@ describe('submitContactForm', () => {
     try {
       await submitContactForm(prevState, formData);
     } catch (error: any) {
-      // Next.js の redirect は内部的にエラーをスローするため、ここでキャッチします
-      // https://nextjs.org/docs/app/api-reference/functions/redirect#how-redirect-works
-      // "Redirects are implemented by returning a 307 (Temporary Redirect) or 308 (Permanent Redirect) HTTP response to the caller.
-      //  The Next.js router will intercept this response and perform a client-side navigation to the new URL.
-      //  If a redirect is triggered from a Server Action, the router will perform a client-side navigation after the action has completed."
-      //
-      //  "Important: redirect throws an error, so it must be called outside of try/catch blocks."
-      //  この記述は、redirect()自体がtry-catchの外で呼ばれるべきという意味であり、
-      //  呼び出し元で発生する可能性のあるエラー（リダイレクトによる内部的なエラーを含む）を
-      //  キャッチしてはいけないという意味ではないと解釈しています。
-      //  テストにおいては、redirectが呼ばれたことを確認するために、このエラーを期待します。
       expect(error.message).toContain('NEXT_REDIRECT');
     }
 
