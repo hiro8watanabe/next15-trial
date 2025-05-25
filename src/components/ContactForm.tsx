@@ -31,11 +31,18 @@ export default function ContactForm() {
     } catch (error) {
       // バリデーションエラーかチェック
       if (error instanceof z.ZodError) {
-        // 最初のエラーを取得
-        const errorMessage = error.errors[0]?.message || '';
-        setClientErrors((prev) => ({
-          ...prev, // スプレッド構文で既存エラー状態をコピー
-          [name]: errorMessage, // 対象フィールドのエラーを更新
+        let errorMessage = '';
+        const firstError = error.errors[0];
+
+        if (firstError) {
+          if (firstError.message) {
+            errorMessage = firstError.message;
+          }
+        }
+
+        setClientErrors((prevErrors) => ({
+          ...prevErrors,
+          [name]: errorMessage,
         }));
       }
     }
