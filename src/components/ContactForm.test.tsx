@@ -80,4 +80,5 @@ describe('ContactForm', () => {
       screen.queryByText(/正しいメールアドレス形式で入力してください/i)
     ).not.toBeInTheDocument();
   });
+  
 });
