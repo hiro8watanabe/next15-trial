@@ -2,14 +2,14 @@ import React from 'react';
 import '@testing-library/jest-dom';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import ContactForm from './ContactForm';
-import { submitContactForm } from '../app/lib/actions/contact';
+import { submitContactForm } from '../lib/actions/contact';
 import { ContactSchema } from '../validations/contact';
 import { ZodError, ZodIssueCode } from 'zod';
 import userEvent from '@testing-library/user-event';
 
 // submitContactForm のモック
-jest.mock('@/app/lib/actions/contact', () => ({
-  ...jest.requireActual('@/app/lib/actions/contact'),
+jest.mock('@/lib/actions/contact', () => ({
+  ...jest.requireActual('@/lib/actions/contact'),
   submitContactForm: jest.fn(),
 }));
 

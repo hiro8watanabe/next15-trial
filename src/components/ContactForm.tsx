@@ -1,6 +1,6 @@
 'use client';
 import { z } from 'zod';
-import { submitContactForm } from '@/app/lib/actions/contact';
+import { submitContactForm } from '@/lib/actions/contact';
 import { useActionState, useState, useEffect } from 'react';
 import { ContactSchema } from '@/validations/contact';
 
