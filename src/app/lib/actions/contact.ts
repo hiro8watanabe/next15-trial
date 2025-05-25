@@ -27,7 +27,6 @@ export async function submitContactForm(
 
   if (!validatedResult.success) {
     const errors = validatedResult.error.flatten().fieldErrors;
-    console.log('サーバー側でエラーが発生しました', errors);
     return {
       success: false,
       errors: {
@@ -36,8 +35,6 @@ export async function submitContactForm(
       },
     };
   }
-
-  console.log('送信されたデータ', name, email);
 
   redirect('/contacts/complete');
 }
