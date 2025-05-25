@@ -5,6 +5,7 @@ import ContactForm from './ContactForm';
 import { submitContactForm } from '../app/lib/actions/contact';
 import { ContactSchema } from '../validations/contact';
 import { ZodError, ZodIssueCode } from 'zod';
+import userEvent from '@testing-library/user-event';
 
 // submitContactForm のモック
 jest.mock('@/app/lib/actions/contact', () => ({
@@ -196,69 +197,67 @@ describe('ContactForm', () => {
 
   describe('入力フィールドのエラークラス (bg-red-50)', () => {
     it('名前入力: クライアントサイドエラーで bg-red-50 がつく', async () => {
-      const nameInput = screen.getByLabelText('お名前');
-      fireEvent.change(nameInput, { target: { value: '名' } }); // 短すぎる名前
+      const nameInput = screen.getByLabelText(/お名前/i);
+      await userEvent.type(nameInput, 'ab');
       fireEvent.blur(nameInput);
       expect(
         await screen.findByText(/名前は3文字以上で入力してください/i)
       ).toBeInTheDocument();
-      expect(nameInput).toHaveClass('bg-red-50');
+      expect(nameInput).toHaveClass('!bg-red-50');
     });
 
     it('名前入力: サーバーサイドエラーで bg-red-50 がつく', async () => {
-      (submitContactForm as jest.Mock).mockImplementationOnce(async () => ({
+      // submitContactForm をモックしてサーバーエラーをシミュレート
+      const mockSubmitContactForm = submitContactForm as jest.Mock;
+      mockSubmitContactForm.mockResolvedValueOnce({
         success: false,
         errors: { name: ['サーバーからの名前エラー'] },
-      }));
-
-      const nameInput = screen.getByLabelText('お名前');
-      fireEvent.change(nameInput, { target: { value: '適切な名前' } });
-      fireEvent.change(screen.getByLabelText('メールアドレス'), {
-        target: { value: 'test@example.com' },
       });
 
-      const submitButton = screen.getByRole('button', { name: '送信' });
-      await act(async () => {
-        fireEvent.click(submitButton);
-      });
+      const nameInput = screen.getByLabelText(/お名前/i);
+      const emailInput = screen.getByLabelText(/メールアドレス/i);
+      const submitButton = screen.getByRole('button', { name: /送信/i });
+
+      await userEvent.type(nameInput, 'サーバーエラーテスト');
+      await userEvent.type(emailInput, 'test@example.com');
+      await userEvent.click(submitButton);
 
       expect(
         await screen.findByText('サーバーからの名前エラー')
       ).toBeInTheDocument();
-      expect(nameInput).toHaveClass('bg-red-50');
+      expect(nameInput).toHaveClass('!bg-red-50');
     });
 
     it('メール入力: クライアントサイドエラーで bg-red-50 がつく', async () => {
-      const emailInput = screen.getByLabelText('メールアドレス');
-      fireEvent.change(emailInput, { target: { value: 'invalid' } }); // 不正なメール
+      const emailInput = screen.getByLabelText(/メールアドレス/i);
+      await userEvent.type(emailInput, 'invalid-email');
       fireEvent.blur(emailInput);
       expect(
         await screen.findByText(/正しいメールアドレス形式で入力してください/i)
       ).toBeInTheDocument();
-      expect(emailInput).toHaveClass('bg-red-50');
+      expect(emailInput).toHaveClass('!bg-red-50');
     });
 
     it('メール入力: サーバーサイドエラーで bg-red-50 がつく', async () => {
-      (submitContactForm as jest.Mock).mockImplementationOnce(async () => ({
+      // submitContactForm をモックしてサーバーエラーをシミュレート
+      const mockSubmitContactForm = submitContactForm as jest.Mock;
+      mockSubmitContactForm.mockResolvedValueOnce({
         success: false,
         errors: { email: ['サーバーからのメールエラー'] },
-      }));
-
-      fireEvent.change(screen.getByLabelText('お名前'), {
-        target: { value: '適切な名前' },
       });
-      const emailInput = screen.getByLabelText('メールアドレス');
-      fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
 
-      const submitButton = screen.getByRole('button', { name: '送信' });
-      await act(async () => {
-        fireEvent.click(submitButton);
-      });
+      const nameInput = screen.getByLabelText(/お名前/i);
+      const emailInput = screen.getByLabelText(/メールアドレス/i);
+      const submitButton = screen.getByRole('button', { name: /送信/i });
+
+      await userEvent.type(nameInput, 'テストユーザー');
+      await userEvent.type(emailInput, 'servererrortest@example.com');
+      await userEvent.click(submitButton);
 
       expect(
         await screen.findByText('サーバーからのメールエラー')
       ).toBeInTheDocument();
-      expect(emailInput).toHaveClass('bg-red-50');
+      expect(emailInput).toHaveClass('!bg-red-50');
     });
   });
 });
