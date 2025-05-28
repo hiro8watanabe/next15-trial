@@ -43,5 +43,5 @@ next-env.d.ts
 # Ignore generated Prisma client
 /src/generated/prisma
 # Prisma SQLite DB
-/prisma/migration/dev.db
-/prisma/migration/dev.db-journal
+/prisma/migrations/dev.db
+/prisma/migrations/dev.db-journal
