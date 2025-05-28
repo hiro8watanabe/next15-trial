@@ -1,4 +1,15 @@
 import { submitContactForm } from './contact';
+// prisma のモック (prisma をインポートしている実際のパスに合わせてください)
+// `src/lib/prisma.ts` で `export const prisma = new PrismaClient()` とされていると仮定
+jest.mock('@/lib/prisma', () => ({
+  __esModule: true,
+  prisma: {
+    contact: {
+      create: jest.fn(),
+      findUnique: jest.fn(), // findUnique をモックに追加
+    },
+  },
+}));
 
 // redirectのモック
 jest.mock('next/navigation', () => ({
@@ -14,6 +25,14 @@ describe('submitContactForm', () => {
   beforeEach(() => {
     // 各テストの前にモックをリセット
     (require('next/navigation').redirect as jest.Mock).mockClear();
+    // prisma のモックをクリア
+    const mockedPrisma = require('@/lib/prisma').prisma;
+    if (jest.isMockFunction(mockedPrisma.contact.create)) {
+      mockedPrisma.contact.create.mockClear();
+    }
+    if (jest.isMockFunction(mockedPrisma.contact.findUnique)) {
+      mockedPrisma.contact.findUnique.mockClear(); // findUnique のモックもクリア
+    }
   });
 
   it('バリデーションエラー: 名前が空の場合', async () => {
@@ -63,6 +82,15 @@ describe('submitContactForm', () => {
     const formData = new FormData();
     formData.append('name', 'Test User');
     formData.append('email', 'test@example.com');
+
+    // prisma のモックを設定
+    const { prisma: mockedPrisma } = require('@/lib/prisma');
+    mockedPrisma.contact.findUnique.mockResolvedValue(null); // 既存ユーザーなしと仮定
+    mockedPrisma.contact.create.mockResolvedValue({
+      id: 'mocked-id',
+      name: 'Test User',
+      email: 'test@example.com',
+    });
 
     // submitContactForm は redirect を呼び出すと例外を発生させるので、try-catch で囲む
     try {
